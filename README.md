@@ -75,7 +75,8 @@ begin: 15:13, end: 15:15, dur: 2minutes
     --disable-libssp           \
     --disable-libvtv           \
     --disable-libstdcxx        \
-    --enable-langauges=c,c++
+    --enable-languages=c,c++   \
+    --disable-bootstrap        \
 ```
 
 make
@@ -92,10 +93,74 @@ checking whether the C compiler works... no
 configure: error: in `/media/ruff/compile/sources/11.3/gcc-12.2.0/build/x86_64-lfs-linux-gnu/libbacktrace':
 configure: error: C compiler cannot create executables
 
+lfs gcc link tests are not allowed after GCC_NO_EXECUTABLES
+
 ```
 
 无法生成可执行文件，实际上编译已经成功了。
 
+If you're building this on a x86_64 machine and you have x86_64 as target, you're not actually building a cross compiler.
+You seem to be building an isolated stage1 compiler, so you have to add **--disable-bootstrap flag**. GCC by default disables bootstrap if your build target platform is not the native platform (a cross compiler).
+
+```
+--disable-bootstrap
+# 还是不行, 但是上一个错误已经没有了
+checking dynamic linker characteristics... configure: error: Link tests are not allowed after GCC_NO_EXECUTABLES.
+make[1]: *** [Makefile:15714: **configure-target-libobjc**] Error 1
+
+lfs-linux-gnu/bin/ld: cannot find Scrt1.o: No such file or directory
+lfs-linux-gnu/bin/ld: cannot find crti.o: No such file or directory
+lfs-linux-gnu/bin/ld: cannot find -lc: No such file or directory
+lfs-linux-gnu/bin/ld: cannot find crtn.o: No such file or directory
+
+checking dynamic linker characteristics... configure: error: Link tests are not allowed after GCC_NO_EXECUTABLES.
+make[1]: *** [Makefile:15714: configure-target-libobjc] Error 1
+make[1]: Leaving directory '/media/ruff/compile/sources/gcc-12.2.0/build'
+
+```
+
+Second - that error indicates that you didn't tell the compiler what platform it should be targeting. Without that information, the compiler will complain that it cannot link executables (which is the behavior you're seeing).
+
+现在发现了一处错误--enable-languages, 居然拼写错误,lto, objc is compiled by default.这下成功了,
+
+configure --help, 可以查看一些配置选项,
+
+```
+$ cat gcc/limitx.h  gcc/glimits.h gcc/limity.h  > `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/install-tools/include/limits.h
+```
+
+#### 5.4 Linux-6.1.11 API headers,
+将linux kernel 的编程接口提供给C library, Glibc, 
+
+```
+make headers 
+find usr/include -type f ! -name '*.h' -delete
+cp -rv usr/include $LFS/usr
+
+```
+#### 5.5 Glibc-2.37
+main C library,
+
+```
+$ ln -sfv ../lib/ld-linux-x86-64.so.2 #LFS/lib64
+
+patch -p1 < ../xx.patch file,
+
+../configure  \
+    --prefix=/usr \
+    --host=$LFS_TGT \
+    --build=$(../scripts/config.guess) \
+    --enable-kernel=3.2 \
+    --with-headers=$LFS/usr/include \
+    libc_cv_slibdir=/usr/lib
+
+make DESTDIR=$LFS install
+sed '/RTLDLIST=/s@/usr@@g' -i $LFS/usr/bin/ldd
+
+$LFS/tools/libexec/gcc/$LFS_TGT/12.2.0/install-tools/mkheaders
+```
+
+#### 5.6 Libstdc++ from GCC-12.2.0
 
 ### chapters 7-10, /mnt/lfs partition,
 
