@@ -162,6 +162,220 @@ $LFS/tools/libexec/gcc/$LFS_TGT/12.2.0/install-tools/mkheaders
 
 #### 5.6 Libstdc++ from GCC-12.2.0
 
+进入gcc目录, libstdc++-v3, 生成一个新的build目录,
+
+```
+../libstdc++-v3/configure \
+    --host=$LFS_TGT \
+    --build=$(../config.guess) \
+    --prefix=/usr \
+    --disable-multilib \
+    --disable-nls \
+    --disable-libstdcxx-pch \
+    --with-gxx-include-dir=/tools/$LFS_TGT/include/c++/12.2.0
+```
+
+### chap 6, Cross Compiling Temporary Tools
+目前还是需要使用host上的工具,
+
+#### 6.2 M4
+a macro processor,
+
+```
+./configure --prefix=/usr \
+    --host=$LFS_TGT \
+    --build=$(build-aux/config.guess)
+```
+
+#### 6.3 Ncurses-6.4
+terminal-independent handling of character screens.
+
+```
+pushd build
+    ../configure
+    make -C include
+    make -C progs tic
+popd
+
+./configure --prefix=/usr \
+--host=$LFS_TGT \
+--build=$(./config.guess) \
+--mandir=/usr/share/man \
+--with-manpage-format=normal \
+--with-shared \
+--without-normal \
+--with-cxx-shared \
+--without-debug \
+--without-ada \
+--disable-stripping \
+--enable-widec
+
+```
+
+#### 6.4 Bash-5.2
+Bash shell,
+
+```
+./configure --prefix=/usr \
+--build=$(sh support/config.guess) \
+--host=$LFS_TGT \
+--without-bash-malloc
+```
+
+#### 6.5 Coreutils-9.1
+basic utility programs , for os, 
+
+```
+./configure --prefix=/usr \
+--host=$LFS_TGT \
+--build=$(build-aux/config.guess) \
+--enable-install-program=hostname \
+--enable-no-install-program=kill,uptime
+
+```
+
+#### 6.6 Diffutils-3.9
+两个文件之间的差别
+
+#### 6.7 File-5.44
+
+```
+../configure --disable-bzlib \
+--disable-libseccomp \
+--disable-xzlib \
+--disable-zlib
+
+./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess)
+
+make FILE_COMPILE=$(pwd)/build/src/file
+
+```
+
+#### 6.8 Findutils-4.9.0
+
+```
+./configure --prefix=/usr \
+--localstatedir=/var/lib/locate \
+--host=$LFS_TGT \
+--build=$(build-aux/config.guess)
+```
+
+install-exec-am, install-data-am,
+
+#### 6.9 Gawk-5.2.1
+awk manipulating text files,
+
+```
+./configure --prefix=/usr \
+--host=$LFS_TGT \
+--build=$(build-aux/config.guess)
+```
+#### 6.10 Grep-3.8
+查询文件内容,
+
+```
+./configure --prefix=/usr \
+--host=$LFS_TGT
+```
+
+#### 6.11 Gzip-1.12
+```
+./configure --prefix=/usr --host=$LFS_TGT
+```
+
+#### 6.12 Make-4.4
+```
+sed -e '/ifdef SIGPIPE/,+2 d' \
+-e '/undef FATAL_SIG/i FATAL_SIG (SIGPIPE);' \
+-i src/main.c
+
+./configure --prefix=/usr \
+--without-guile \
+--host=$LFS_TGT \
+--build=$(build-aux/config.guess)
+```
+#### 6.13 patch-2.7.6
+
+```
+./configure --prefix=/usr \
+--host=$LFS_TGT \
+--build=$(build-aux/config.guess)
+```
+
+#### 6.14 Sed-4.9
+
+#### 6.15 tar-1.34
+```
+./configure --prefix=/usr \
+--host=$LFS_TGT \
+--build=$(build-aux/config.guess)
+```
+
+#### 6.16 Xz-5.4.1
+
+```
+./configure --prefix=/usr \
+--host=$LFS_TGT \
+--build=$(build-aux/config.guess) \
+--disable-static \
+--docdir=/usr/share/doc/xz-5.4.1
+
+```
+
+#### 6.17 binutils-2.40
+2nd round pass,需要重新解压!
+
+```
+sed '6009s/$add_dir//' -i ltmain.sh
+../configure \
+--prefix=/usr \
+--build=$(../config.guess) \
+--host=$LFS_TGT \
+--disable-nls \
+--enable-shared \
+--enable-gprofng=no \
+--disable-werror \
+--enable-64-bit-bfd
+```
+
+#### 6.18 gcc-12.2 
+2nd pass,
+
+```
+sed '/thread_header =/s/@.*@/gthr-posix.h/' \
+-i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
+
+../configure \
+--build=$(../config.guess) \
+--host=$LFS_TGT \
+--target=$LFS_TGT \
+LDFLAGS_FOR_TARGET=-L$PWD/$LFS_TGT/libgcc \
+--prefix=/usr \
+--with-build-sysroot=$LFS \
+--enable-default-pie \
+--enable-default-ssp \
+--disable-nls \
+--disable-multilib \
+--disable-libatomic \
+--disable-libgomp \
+--disable-libquadmath \
+--disable-libssp \
+--disable-libvtv \
+--enable-languages=c,c++ 
+
+
+
+```
+
 ### chapters 7-10, /mnt/lfs partition,
+
+在chroot中编译临时性的工具,
+
+#### 7.4 准备virtual kernel file systems
+content resides in memory, no disk space used,
+
+```
+mkdir -pv {dev,proc,sys,run}
+```
 
 
