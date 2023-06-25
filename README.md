@@ -376,12 +376,12 @@ content resides in memory, no disk space used,
 
 ```
 mkdir -pv {dev,proc,sys,run}
-mount -v --bind /dev $LFS/dev
+sudo mount -v --bind /dev $LFS/dev
 sudo mount -v --bind /dev/pts $LFS/dev/pts
 sudo mount -vt proc proc $LFS/proc
 sudo mount -vt sysfs sysfs $LFS/sys
 sudo mount -vt tmpfs tmpfs $LFS/run
-sudo mount -t tmpfs -o nosuid,nodev tmps $LFS/dev/shm
+sudo mount -vt tmpfs -o nosuid,nodev tmps $LFS/dev/shm
 
 sudo chroot "$LFS" /usr/bin/env -i \
     HOME=/root    \
@@ -481,6 +481,136 @@ chmod -v 600 /var/log/btmp
 
 
 ```
+
+#### 7.7 Gettext 0.21.1
+internationalization , localization,
+这样可以使, programs, compiled with NLS, native language support, 输出信息, user's native language.
+
+```
+./configure --disable-shared
+make
+cp -v  gettext-tools/src/{msgfmt,msgmerge,xgettext} /usr/bin
+```
+#### 7.8 Bison-3.8.2
+parser tenerator,
+
+```
+./configure --prefix=/usr \
+    --docdir=/usr/share/doc/bison-3.8.2
+```
+#### 7.9 Perl-5.36.0
+Practical Extraction and Report Language,
+
+```
+./Configure -des \
+-Dprefix=/usr \
+-Dvendorprefix=/usr \
+-Dprivlib=/usr/lib/perl5/5.36/core_perl \
+-Darchlib=/usr/lib/perl5/5.36/core_perl \
+-Dsitelib=/usr/lib/perl5/5.36/site_perl \
+-Dsitearch=/usr/lib/perl5/5.36/site_perl \
+-Dvendorlib=/usr/lib/perl5/5.36/vendor_perl \
+-Dvendorarch=/usr/lib/perl5/5.36/vendor_perl
+
+make
+make install
+```
+
+#### 7.10 Python-3.11.2,
+python 3 package, python development environment, 
+
+```
+./configure --prefix=/usr \
+    --enable-shared \
+    --without-ensurepip
+```
+
+#### 7.11 Texinfo-7.0.2
+programs for reading, wriging, converting info pages,
+
+#### 7.12 Util-linux-2.38.1
+miscellaneous utility programs, FHS建议使用/var/lib/hwclock目录，代替/etc目录, for adjtime文件,
+
+```
+./configure ADJTIME_PATH=/var/lib/hwclock/adjtime \
+--libdir=/usr/lib \
+--docdir=/usr/share/doc/util-linux-2.38.1 \
+--disable-chfn-chsh \
+--disable-login \
+--disable-nologin \
+--disable-su \
+--disable-setpriv \
+--disable-runuser \
+--disable-pylibmount \
+--disable-static \
+--without-python \
+runstatedir=/run
+
+```
+
+#### 7.13 cleaning up and saving the temporary system,
+备份
+
+```shell
+$ sudo mountpoint -q $LFS/dev/shm && umount $LFS/dev/shm
+sudo umount $LFS/dev/pts
+umount $LFS/{sys,proc,run,dev}
+
+tar -cJpf $HOME/lfs-temp-tools-11.3.tar.xz .
+
+# 恢复
+cd $LFS
+rm -rf ./*
+tar -xpf $HOME/lfs-temp-tools-11.3.tar.xz
+```
+
+### Building the LFS System,
+安装基础的系统软件, 
+
+包管理, Package Management,
+
+需要设置环境变量, PATH, LD_LIBRARY_PATH, MANPATH, INFOPATH, CPPFLAGS, 包含库的路径, 
+
+symlink style package management, 每个文件都symlinked into /usr hierarchy, 自动的symlinks creation, /usr/pkg目录下面, 
+
+```
+Stow,
+Epkg,
+Graft,
+Depot,
+./configure --prefix=/usr/pkg/libfoo/1.1,
+make,
+make DESTDIR=/usr/pkg/libfoo/1.1 install,
+
+```
+
+Creating Package Archives,
+
+faked into a separate tree as previously described in the symlink style package management section. 
+
+```
+RPM, 
+pkg-utils,
+apt,
+Portage,
+
+```
+
+配置文件,
+```
+/etc/hosts
+/etc/fstab
+/etc/passwd
+/etc/group
+/etc/shadow,
+/etc/ld.so.conf,
+/etc/sysconfig/rc.site,
+/etc/sysconfig/network,
+/etc/sysconfig/ifconfig.eth0,
+
+```
+
+#### 8.3 Man-pages-6.03,
 
 
 
