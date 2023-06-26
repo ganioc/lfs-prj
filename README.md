@@ -376,6 +376,7 @@ content resides in memory, no disk space used,
 
 ```
 mkdir -pv {dev,proc,sys,run}
+export LFS=/media/ruff/compile
 sudo mount -v --bind /dev $LFS/dev
 sudo mount -v --bind /dev/pts $LFS/dev/pts
 sudo mount -vt proc proc $LFS/proc
@@ -612,5 +613,260 @@ Portage,
 
 #### 8.3 Man-pages-6.03,
 
+2400 man pages, 描述C programming language functions, important device files, and significant configuration files,
 
+```
+make prefix=/usr install
+```
+
+#### 8.4 iana-Etc-20230202, 
+提供了network services, protocols的数据, tcp/ip 服务的名称的映射,
+
+#### 8.5 Glibc-2.37,
+main C library, basic routines for allocating memory, searching directories, opening and closing files, 读写文件，字符串操作, pattern matching, arithemtic, 算术运算,
+
+```shell
+patch -Np1 -i ../glibc-2.37-fhs-1.patch
+sed '/width -=/s/workend - string/number_length/' \
+-i stdio-common/vfprintf-process-arg.c
+
+echo "rootsbindir=/usr/sbin" > configparms
+
+../configure --prefix=/usr \
+    --disable-werror \
+    --enable-kernel=3.2 \
+    --enable-stack-protector=strong \
+    --with-headers=/usr/include \
+    libc_cv_slibdir=/usr/lib
+
+touch /etc/ld.so.conf
+sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
+
+make check,
+make install,
+sed '/RTLDLIST=/s@/usr@@g' -i /usr/bin/ldd
+cp -v ../nscd/nscd.conf /etc/nscd.conf
+mkdir -pv /var/cache/nscd
+
+# locales
+mkdir -pv /usr/lib/locale
+localedef -i POSIX -f UTF-8 C.UTF-8 2> /dev/null || true
+localedef -i cs_CZ -f UTF-8 cs_CZ.UTF-8
+localedef -i de_DE -f ISO-8859-1 de_DE
+localedef -i de_DE@euro -f ISO-8859-15 de_DE@euro
+localedef -i de_DE -f UTF-8 de_DE.UTF-8
+localedef -i el_GR -f ISO-8859-7 el_GR
+localedef -i en_GB -f ISO-8859-1 en_GB
+localedef -i en_GB -f UTF-8 en_GB.UTF-8
+localedef -i en_HK -f ISO-8859-1 en_HK
+localedef -i en_PH -f ISO-8859-1 en_PH
+localedef -i en_US -f ISO-8859-1 en_US
+localedef -i en_US -f UTF-8 en_US.UTF-8
+localedef -i es_ES -f ISO-8859-15 es_ES@euro
+localedef -i es_MX -f ISO-8859-1 es_MX
+localedef -i fa_IR -f UTF-8 fa_IR
+localedef -i fr_FR -f ISO-8859-1 fr_FR
+localedef -i fr_FR@euro -f ISO-8859-15 fr_FR@euro
+localedef -i fr_FR -f UTF-8 fr_FR.UTF-8
+localedef -i is_IS -f ISO-8859-1 is_IS
+localedef -i is_IS -f UTF-8 is_IS.UTF-8
+localedef -i it_IT -f ISO-8859-1 it_IT
+localedef -i it_IT -f ISO-8859-15 it_IT@euro
+localedef -i it_IT -f UTF-8 it_IT.UTF-8
+localedef -i ja_JP -f EUC-JP ja_JP
+localedef -i ja_JP -f SHIFT_JIS ja_JP.SJIS 2> /dev/null || true
+localedef -i ja_JP -f UTF-8 ja_JP.UTF-8
+localedef -i nl_NL@euro -f ISO-8859-15 nl_NL@euro
+localedef -i ru_RU -f KOI8-R ru_RU.KOI8-R
+localedef -i ru_RU -f UTF-8 ru_RU.UTF-8
+localedef -i se_NO -f UTF-8 se_NO.UTF-8
+localedef -i ta_IN -f UTF-8 ta_IN.UTF-8
+localedef -i tr_TR -f UTF-8 tr_TR.UTF-8
+localedef -i zh_CN -f GB18030 zh_CN.GB18030
+localedef -i zh_HK -f BIG5-HKSCS zh_HK.BIG5-HKSCS
+localedef -i zh_TW -f UTF-8 zh_TW.UTF-8
+
+
+make localedata/install-locales
+/etc/nsswitch.conf,
+cat > /etc/nsswitch.conf << "EOF"
+# Begin /etc/nsswitch.conf
+passwd: files
+group: files
+shadow: files
+hosts: files dns
+networks: files
+protocols: files
+services: files
+ethers: files
+rpc: files
+# End /etc/nsswitch.conf
+EOF
+
+# time zone data
+tar -xf ../../tzdata2022g.tar.gz
+ZONEINFO=/usr/share/zoneinfo
+mkdir -pv $ZONEINFO/{posix,right}
+for tz in etcetera southamerica northamerica europe africa antarctica asia australasia backward; do
+zic -L /dev/null -d $ZONEINFO ${tz}
+zic -L /dev/null -d $ZONEINFO/posix ${tz}
+zic -L leapseconds -d $ZONEINFO/right ${tz}
+done
+
+cp -v zone.tab zone1970.tab iso3166.tab $ZONEINFO
+zic -d $ZONEINFO -p America/New_York
+unset ZONEINFO
+
+tzselect ,
+You can make this change permanent for yourself by appending the line
+	TZ='Asia/Shanghai'; export TZ
+to the file '.profile' in your home directory; then log out and log in again
+
+
+# dynamic loader,
+/lib/ld-linux.so.2,  search /usr/lib,
+其它的地址
+/usr/local/lib
+/opt/lib,
+cat > /etc/ld.so.conf << "EOF"
+# Begin /etc/ld.so.conf
+/usr/local/lib
+/opt/lib
+EOF
+
+cat >> /etc/ld.so.conf << "EOF"
+# Add an include directory
+include /etc/ld.so.conf.d/*.conf
+EOF
+mkdir -pv /etc/ld.so.conf.d
+
+mtrace
+nscd,
+pcprofiledump
+pldd
+sln
+sotruss # traces shared library procedure calls of a specified command
+sprof,
+tzselect
+xtrace, # traces the execution of a program by printing currently executed fucntion
+    # trace communicaiotn between X11 client and server,
+zdump, # timezone dumper
+zic,   # time zone compiler
+
+
+```
+5000项测试, 
+
+
+#### 8.6 zlib-1.2.13
+
+#### 8.7 bzip2
+bzip2, 比gzip性能要好,
+
+```
+sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+
+make -f Makefile-libbz2_so
+make clean
+make PREFIX=/usr install
+cp -av libbz2.so.* /usr/lib
+ln -sv libbz2.so.1.0.8 /usr/lib/libbz2.so
+cp -v bzip2-shared /usr/bin/bzip2
+for i in /usr/bin/{bzcat,bunzip2}; do
+ln -sfv bzip2 $i
+done
+
+rm -fv /usr/lib/libbz2.a
+
+```
+
+#### 8.8 xz-5.4.1
+lzma, xz 压缩格式, 
+
+```
+./configure --prefix=/usr
+ \
+--disable-static \
+--docdir=/usr/share/doc/xz-5.4.1
+```
+
+#### 8.9 zstd-1.5.4
+real time compression 算法, 
+
+#### 8.10 file-5.44
+determine the type of a given file or files
+
+#### 8.11 readline-8.2
+offers command line editing and history capabilities
+
+```
+sed -i '/MV.*old/d' Makefile.in
+sed -i '/{OLDSUFF}/c:' support/shlib-install
+patch -Np1 -i ../readline-8.2-upstream_fix-1.patch
+
+./configure --prefix=/usr \
+    --disable-static \
+    --with-curses \
+    --docdir=/usr/share/doc/readline-8.2
+
+termcap library, curses library, 
+make SHLIB_LIBS="-lncursesw"
+make SHLIB_LIBS="-lncursesw" install
+install -v -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-8.2
+
+libhistory,
+libreadline, 
+```
+
+#### 8.12 m4-1.4.19
+macro processor,
+
+#### 8.13 bc-6.2.4
+arbitrary precision numeric processing language,
+
+#### flex-2.6.4
+```
+./configure --prefix=/usr \
+    --docdir=/usr/share/doc/flex-2.6.4 \
+    --disable-static
+ln -sv flex /usr/bin/lex
+```
+
+#### tcl-8.6.13
+a robust general purpose scriptiong languages, tickle pronounced; running test suites for binutils, gcc and other packages,  Expect, and DejaGNU, 
+
+```
+SRCDIR=$(pwd)
+cd unix
+./configure --prefix=/usr \
+    --mandir=/usr/share/man
+
+make
+sed -e "s|$SRCDIR/unix|/usr/lib|" \
+-e "s|$SRCDIR|/usr/include|" \
+-i tclConfig.sh
+
+sed -e "s|$SRCDIR/unix/pkgs/tdbc1.1.5|/usr/lib/tdbc1.1.5|" \
+-e "s|$SRCDIR/pkgs/tdbc1.1.5/generic|/usr/include|" \
+-e "s|$SRCDIR/pkgs/tdbc1.1.5/library|/usr/lib/tcl8.6|" \
+-e "s|$SRCDIR/pkgs/tdbc1.1.5|/usr/include|" \
+-i pkgs/tdbc1.1.5/tdbcConfig.sh
+
+sed -e "s|$SRCDIR/unix/pkgs/itcl4.2.3|/usr/lib/itcl4.2.3|" \
+-e "s|$SRCDIR/pkgs/itcl4.2.3/generic|/usr/include|" \
+-e "s|$SRCDIR/pkgs/itcl4.2.3|/usr/include|" \
+-i pkgs/itcl4.2.3/itclConfig.sh
+
+unset SRCDIR
+
+chmod -v u+w /usr/lib/libtcl8.6.so
+make install-private-headers
+ln -sfv tclsh8.6 /usr/bin/tclsh
+mv /usr/share/man/man3/{Thread,Tcl_Thread}.3
+
+
+
+```
+
+#### 8.16 expect-5.45.4
 
