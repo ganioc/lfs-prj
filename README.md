@@ -869,4 +869,134 @@ mv /usr/share/man/man3/{Thread,Tcl_Thread}.3
 ```
 
 #### 8.16 expect-5.45.4
+for automating, via scripted dialogues, interactive applications such as telnet, ftp, passwd, fsck, rlogin, tip, k可以用来测试这些应用, DejaGnu framework is written in Expect.
+
+```
+./configure --prefix=/usr \
+    --with-tcl=/usr/lib \
+    --enable-shared \
+    --mandir=/usr/share/man \
+    --with-tclinclude=/usr/include
+make install
+ln -svf expect5.45.4/libexpect5.45.4.so /usr/lib
+```
+
+#### 8.17 DejaGNU-1.6.3
+For running test suites on GNU tools.
+
+```
+../configure --prefix=/usr
+makeinfo --html --no-split -o doc/dejagnu.html ../doc/dejagnu.texi
+makeinfo --plaintext -o doc/dejagnu.txt ../doc/dejagnu.texi
+make install
+install -v -dm755 /usr/share/doc/dejagnu-1.6.3
+install -v -m644 doc/dejagnu.{html,txt} /usr/share/doc/dejagnu-1.6.3
+
+dejagnu, DejaGNU auxiliary command launcher, 
+runtest, wrapper script,
+```
+
+#### 8.18 binutils-2.40
+
+```
+expect -c "spawn ls"
+../configure --prefix=/usr \
+--sysconfdir=/etc \
+--enable-gold \
+--enable-ld=default \
+--enable-plugins \
+--enable-shared \
+--disable-werror \
+--enable-64-bit-bfd \
+--with-system-zlib
+
+make tooldir=/usr
+make -k check
+grep '^FAIL:' $(find -name '*.log')
+make tooldir=/usr install
+
+rm -fv /usr/lib/lib{bfd,ctf,ctf-nobfd,sframe,opcodes}.a
+rm -fv /usr/share/man/man1/{gprofng,gp-*}.1
+```
+
+#### 8.19 GMP-6.2.1
+math libraries, arbitrary precision arithmetic,
+
+```
+./configure --prefix=/usr \
+--enable-cxx \
+--disable-static \
+--docdir=/usr/share/doc/gmp-6.2.1
+
+make check 2>&1 | tee gmp-check-log
+awk '/# PASS:/{total+=$3} ; END{print total}' gmp-check-log
+
+
+```
+
+#### 8.20 MPFR-4.2.0
+multiple precision math,
+
+```
+sed -e 's/+01,234,567/+1,234,567 /' \
+-e 's/13.10Pd/13Pd/' \
+-i tests/tsprintf.c
+
+./configure --prefix=/usr \
+--disable-static \
+--enable-thread-safe \
+--docdir=/usr/share/doc/mpfr-4.2.0
+
+
+```
+
+#### 8.21 mpc-1.3.1
+arithmetic of complex numbers with arbitrarily high precision and correct rounding of the result,
+
+```
+./configure --prefix=/usr \
+--disable-static \
+--docdir=/usr/share/doc/mpc-1.3.1
+
+
+```
+
+#### 8.22 attr-2.5.1
+administer the extended attributes of filesystem objects
+
+```
+./configure --prefix=/usr \
+--disable-static \
+--sysconfdir=/etc \
+--docdir=/usr/share/doc/attr-2.5.1
+
+```
+
+#### 8.23 acl-2.3.1
+to administer Access Control lists, fined grained discretionary access rights for files and directoreis
+
+```
+./configure --prefix=/usr \
+--disable-static \
+--docdir=/usr/share/doc/acl-2.3.1
+
+
+```
+
+#### 8.24 libcap-2.67
+user sapce interace to POSIX 1003.1e, 
+
+```
+sed -i '/install -m.*STA/d' libcap/Makefile
+make prefix=/usr lib=lib
+make prefix=/usr lib=lib install
+
+```
+#### 8.25 shadow-4.13
+handling password in a secure way,
+
+```
+
+
+```
 
