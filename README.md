@@ -995,8 +995,53 @@ make prefix=/usr lib=lib install
 #### 8.25 shadow-4.13
 handling password in a secure way,
 
+```shell
+sed -i 's/groups$(EXEEXT) //' src/Makefile.in
+find man -name Makefile.in -exec sed -i 's/groups\.1 / /' {} \;
+find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \;
+find man -name Makefile.in -exec sed -i 's/passwd\.5 / /' {} \;
+
+sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD SHA512:' \
+-e 's@#\(SHA_CRYPT_..._ROUNDS 5000\)@\100@' \
+-e 's:/var/spool/mail:/var/mail:' \
+-e '/PATH=/{s@/sbin:@@;s@/bin:@@}' \
+-i etc/login.defs
+
+touch /usr/bin/passwd
+./configure --sysconfdir=/etc \
+--disable-static \
+--with-group-name-max-length=32
+
+
+make exec_prefix=/usr install
+make -C man install-man
+
+# enable shadowed passwords,
+pwconv
+grpconv
+sed -i '/MAIL/s/yes/no/' /etc/default/useradd
+passwd root, # Raspberry@2021
+
+
+
 ```
+
+#### 8.26 GCC-12.2.0
+支持7种编程语言,
+
+```
+sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+
+../configure --prefix=/usr \
+LD=ld \
+--enable-languages=c,c++ \
+--enable-default-pie \
+--enable-default-ssp \
+--disable-multilib \
+--disable-bootstrap \
+--with-system-zlib
 
 
 ```
+
 
