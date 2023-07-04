@@ -1029,7 +1029,7 @@ passwd root, # Raspberry@2021
 #### 8.26 GCC-12.2.0
 支持7种编程语言,
 
-```
+```shell
 sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
 
 ../configure --prefix=/usr \
@@ -1041,7 +1041,91 @@ LD=ld \
 --disable-bootstrap \
 --with-system-zlib
 
+PIE, position-independent executable,
+ASLR, Address Space Layout Randomization,
+SSP, Stack Smashing Protection,
 
+make 
+ulimit -s 32768 # increase stack size, 
+# 使用tester来进行测试
+chown -Rv tester .
+su tester -c "PATH=$PATH make -k check"
+../contrib/test_summary
+
+chown -v -R root:root /usr/lib/gcc/$(gcc -dumpmachine)/12.2.0/include{,-fixed}
+ln -svr /usr/bin/cpp /usr/lib
+ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/12.2.0/liblto_plugin.so /usr/lib/bfd-plugins/
+
+echo 'int main(){}' > dummy.c
+cc dummy.c -v -Wl,--verbose &> dummy.log
+readelf -l a.out | grep ': /lib'
+
+grep -E -o '/usr/lib.*/S?crt[1in].*succeeded' dummy.log
+grep -B4 '^ /usr/include' dummy.log
+grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
+grep "/lib.*/libc.so.6 " dummy.log
+grep found dummy.log
+
+mkdir -pv /usr/share/gdb/auto-load/usr/lib
+mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
 ```
 
+LTO, Link Time Optimization,
+
+#### 8.27 pkg-config-0.29.2
+
+```shell
+./configure --prefix=/usr \
+--with-internal-glib \
+--disable-host-tool \
+--docdir=/usr/share/doc/pkg-config-0.29.2
+```
+
+#### 8.28 Ncurses-6.4
+
+```
+./configure --prefix=/usr \
+--mandir=/usr/share/man \
+--with-shared \
+--without-debug \
+--without-normal \
+--with-cxx-shared \
+--enable-pc-files \
+--enable-widec \
+--with-pkg-config-libdir=/usr/lib/pkgconfig
+
+make DESTDIR=$PWD/dest install
+install -vm755 dest/usr/lib/libncursesw.so.6.4 /usr/lib
+rm -v dest/usr/lib/libncursesw.so.6.4
+cp -av dest/* /
+
+for lib in ncurses form panel menu ; do
+    rm -vf /usr/lib/lib${lib}.so
+    echo "INPUT(-l${lib}w)" > /usr/lib/lib${lib}.so
+    ln -sfv ${lib}w.pc /usr/lib/pkgconfig/${lib}.pc
+done
+
+
+rm -vf /usr/lib/libcursesw.so
+echo "INPUT(-lncursesw)" > /usr/lib/libcursesw.so
+ln -sfv libncurses.so /usr/lib/libcurses.so
+
+mkdir -pv /usr/share/doc/ncurses-6.4
+cp -v -R doc/* /usr/share/doc/ncurses-6.4
+```
+
+#### 8.29 Sed-4.9
+
+```
+./configure --prefix=/usr
+
+chown -Rv tester .
+su tester -c "PATH=$PATH make check"
+
+make install
+install -d -m755
+ /usr/share/doc/sed-4.9
+install -m644 doc/sed.html /usr/share/doc/sed-4.9
+
+```
 
