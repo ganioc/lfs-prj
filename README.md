@@ -1160,9 +1160,71 @@ chmod -v 0755 /usr/lib/preloadable_libintl.so
 ```
 
 #### 8.32 Bison-3.8.2
-a parser generator,
+a parser generator, bison yacc liby
 
 ```shell
 ./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.8.2
 
 ```
+
+#### 8.33 grep-3.8
+
+```shell
+sed -i "s/echo/#echo/" src/egrep.sh
+
+```
+egrep, fgrep, grep,
+
+
+#### bash-5.2.15
+Bourne-Again Shell,
+
+
+```shell
+./configure --prefix=/usr \
+--without-bash-malloc \
+--with-installed-readline \
+--docdir=/usr/share/doc/bash-5.2.15
+
+make
+chown -Rv tester .
+su -s /usr/bin/expect tester << EOF
+set timeout -1
+spawn make tests
+expect eof
+lassign [wait] _ _ _ value
+exit $value
+EOF
+
+make install
+exec /usr/bin/bash --login
+
+
+```
+bash, bashbug,sh,
+
+
+#### 8.35 libtool-2.4.7
+GNU generic library support script,
+
+```shell
+make install
+rm -fv /usr/lib/libltdl.a
+```
+libtool, libtoolize , libltdl,
+
+#### gdbm-1.23
+GNU Database Manager, using extensible hasing and works like the standard Unix dbm.
+Storing key/data pairs, searching and retrieving the data by its key and deleting a key along with its data.
+
+```shell
+./configure --prefix=/usr \
+--disable-static \
+--enable-libgdbm-compat
+
+
+```
+
+gdbm_dump, gdbm_load, gdbmtool,
+
+
