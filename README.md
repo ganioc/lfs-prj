@@ -1123,9 +1123,21 @@ chown -Rv tester .
 su tester -c "PATH=$PATH make check"
 
 make install
-install -d -m755
- /usr/share/doc/sed-4.9
+install -d -m755 /usr/share/doc/sed-4.9
 install -m644 doc/sed.html /usr/share/doc/sed-4.9
 
 ```
 
+#### 8.30 psmisc-23.6
+for displaying information about running processes,
+
+```
+fuser, report Process ID, PID, that use the given files or file systems
+killall,
+peekfd,
+prtstat,
+pslog,
+pstree,
+pstree.x11,
+
+```
