@@ -1141,3 +1141,28 @@ pstree,
 pstree.x11,
 
 ```
+
+#### 8.31 Gettext=0.21.1
+for internationalization and localizaiton,
+allow programs to be compiled with NLS, native language Support, enabling them to output messages in the user's native language.
+
+```shell
+./configure --prefix=/usr \
+--disable-static \
+--docdir=/usr/share/doc/gettext-0.21.1
+
+make
+make check
+make install
+chmod -v 0755 /usr/lib/preloadable_libintl.so
+
+
+```
+
+#### 8.32 Bison-3.8.2
+a parser generator,
+
+```shell
+./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.8.2
+
+```
