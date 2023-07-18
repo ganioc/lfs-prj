@@ -1227,4 +1227,142 @@ Storing key/data pairs, searching and retrieving the data by its key and deletin
 
 gdbm_dump, gdbm_load, gdbmtool,
 
+#### 8.37 gperf-3.1
+generate a perfect hash function from a key set,
+
+```shell
+./configure --prefix=/usr --docdir=/usr/share/doc/gperf-3.1
+```
+
+#### 8.38 expat-2.5.0
+a stream oriented C library for parsing XML,
+
+```shell
+./configure --prefix=/usr \
+--disable-static \
+--docdir=/usr/share/doc/expat-2.5.0
+install -v -m644 doc/*.{html,css} /usr/share/doc/expat-2.5.0
+
+
+```
+
+xmlwf, libexpat, 
+
+#### 8.39 inetutils-2.4
+programs for basic networking,包含了ifconfig, dnsdomainname, ftp, hostname, ping, ping6, talk, telnet, tftp, traceroute,
+
+```shell
+./configure --prefix=/usr \
+--bindir=/usr/bin \
+--localstatedir=/var \
+--disable-logger \
+--disable-whois \
+--disable-rcp \
+--disable-rexec \
+--disable-rlogin \
+--disable-rsh \
+--disable-servers
+
+
+mv -v /usr/{,s}bin/ifconfig
+```
+
+logger program, pass messages to System Log Daemon,
+
+
+#### 8.40 less-608
+a text file viewer,
+
+```shell
+./configure --prefix=/usr --sysconfdir=/etc
+
+```
+less, lessecho, lesskey,
+
+#### 8.41 perl-5.36.0
+
+```shell
+export BUILD_ZLIB=False
+export BUILD_BZIP2=0
+
+sh Configure -des \
+-Dprefix=/usr \
+-Dvendorprefix=/usr \
+-Dprivlib=/usr/lib/perl5/5.36/core_perl \
+-Darchlib=/usr/lib/perl5/5.36/core_perl \
+-Dsitelib=/usr/lib/perl5/5.36/site_perl \
+-Dsitearch=/usr/lib/perl5/5.36/site_perl \
+-Dvendorlib=/usr/lib/perl5/5.36/vendor_perl \
+-Dvendorarch=/usr/lib/perl5/5.36/vendor_perl \
+-Dman1dir=/usr/share/man/man1 \
+-Dman3dir=/usr/share/man/man3 \
+-Dpager="/usr/bin/less -isR" \
+-Duseshrplib \
+-Dusethreads
+
+
+```
+
+#### 8.42 xml::parser-2.46
+a perl interface to XML parser, expat,
+
+XML::*.tar.gz
+
+
+```shell
+perl Makefile.PL
+
+```
+Expat, the Perl Expat interface,
+
+
+#### 8.43 Intltool-0.51.0
+internationalization tool used for extracting translatable strings from source files,
+
+```shell
+sed -i 's:\\\${:\\\$\\{:' intltool-update.in
+
+make install
+install -v -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO
+```
+intltoolize,
+intltool-extract,
+intltool-merge,
+intltool-perpare,
+intltool-update,
+
+#### 8.44 autoconf-2.71
+produce shell scripts , automatically configure source code,
+
+
+```shell
+sed -e 's/SECONDS|/&SHLVL|/' \
+-e '/BASH_ARGV=/a\
+ /^SHLVL=/ d' \
+-i.orig tests/local.at
+
+./configure --prefix=/usr
+make
+make check
+make install
+
+
+```
+autoconf, autoheader, autom4te, autoreconf, autoscan, 
+
+autoupdate, ifnames,
+
+#### automake-1.16.5
+for generating Makefiles for use with Autoconf,
+
+```shell
+./configure --prefix=/usr --docdir=/usr/share/doc/automake-1.16.5
+make
+make -j4 check
+
+```
+aclocal, generate aclocal.m4 files based on contents of configure.in files,
+
+automake, generate Makefile.in files from Makefile.am files, 
+
 
