@@ -1365,4 +1365,59 @@ aclocal, generate aclocal.m4 files based on contents of configure.in files,
 
 automake, generate Makefile.in files from Makefile.am files, 
 
+#### 8.46 OpenSSL-3.0.8
+management tools, libraries relating to cryptograph. OpenSSH, email applications, web browsers, for accessing HTTPS sites.
+
+```shell
+./config --prefix=/usr \
+--openssldir=/etc/ssl \
+--libdir=lib \
+shared \
+zlib-dynamic
+
+make
+make test
+
+sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+make MANSUFFIX=ssl install
+
+mv -v /usr/share/doc/openssl /usr/share/doc/openssl-3.0.8
+cp -vfr doc/* /usr/share/doc/openssl-3.0.8
+
+
+```
+c_rehash, a Perl script , scans all files in a directory and adds symbolic links to their hash values. Obsolete, should be replaced by openssl rehash command.
+
+
+openssl, a command line tool for using the various cryptography functions of the OpenSSL's crypto library from the shell. 
+
+libcrypto.so, a wide range of cryptographic algorithms used in various Internet standards. SSL, TLS, S/MIME. used to implement OpenSSH, OpenPGP, and other cryptographic standards.
+
+
+libssl.so, Transport Layer Security (TLS v1) protocol. It provides a rich API, documentation on which can be found by running man 7 ssl.
+
+安装的目录: /etc/ssl, /usr/include/openssl, /usr/lib/engines, /usr/share/doc/openssl-3.0.8,
+
+#### 8.47 Kmod-30
+For loading kernel modules.
+
+
+```shell
+./configure --prefix=/usr \
+--sysconfdir=/etc \
+--with-openssl \
+--with-xz \
+--with-zstd \
+--with-zlib
+
+make install
+for target in depmod insmod modinfo modprobe rmmod; do
+ln -sfv ../bin/kmod /usr/sbin/$target
+done
+ln -sfv kmod /usr/bin/lsmod
+
+
+```
+
+
 
