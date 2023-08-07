@@ -1409,7 +1409,7 @@ For loading kernel modules.
 --with-xz \
 --with-zstd \
 --with-zlib
-
+make
 make install
 for target in depmod insmod modinfo modprobe rmmod; do
 ln -sfv ../bin/kmod /usr/sbin/$target
@@ -1418,6 +1418,366 @@ ln -sfv kmod /usr/bin/lsmod
 
 
 ```
+
+depmod, 生成一个dependency file based on symbols it finds in the existing set of modules, 这个文件被modprobe用来自动加载所需的modules,
+
+insmod, Installs a loadable module in the running kernel,
+
+kmod,  Loads and unloads kernel modules,
+
+lsmod,  Lists currently loaded modules,
+
+modinfo,  Examine an object file associated with a kernel module and displays any information that it can glean
+
+modprobe, Uses a dependency file, created by depmod, to automatically load relevant modules,
+
+rmmod,  Unloads modules from the running kernel,
+
+libkmod,  Used by other programs to load and unload kernel modules,
+
+
+#### 8.48 Libelf from Elfutils-0.188,
+handling ELF (Executable and Linkable Format) files,
+
+```shell
+./configure --prefix=/usr \
+--disable-debuginfod \
+--enable-libdebuginfod=dummy
+
+make
+make check
+
+make -C libelf install
+install -vm644 config/libelf.pc /usr/lib/pkgconfig
+rm /usr/lib/libelf.a
+
+
+
+```
+
+
+#### 8.49 Libffi-3.4.4
+提供portable, high level programming interface to various calling conventions, 允许programmer, call any function, specified by a call interface description at run time.
+
+FFI, Foreign Function Interface,  允许用一种语言编写的程序来调用用另一种语言编写的程序。提供了一个桥梁, between an interpreter like Perl, Python, shared library subroutines written in C, or C++。
+
+```shell
+./configure --prefix=/usr \
+--disable-static \
+--with-gcc-arch=native
+
+make
+make check,
+make install,
+
+
+
+```
+
+#### Python-3.11.2
+包含了一个Python development environment, Useful for object-oriented programming. 
+
+```shell
+./configure --prefix=/usr \
+--enable-shared \
+--with-system-expat \
+--with-system-ffi \
+--enable-optimizations
+
+make
+make install
+
+# To suppress the warnings, 
+cat > /etc/pip.conf << EOF
+[global]
+root-user-action = ignore
+disable-pip-version-check = true
+EOF
+
+
+# To install the documentation,
+install -v -dm755 /usr/share/doc/python-3.11.2/html
+tar --strip-components=1 \
+--no-same-owner \
+--no-same-permissions \
+-C /usr/share/doc/python-3.11.2/html \
+-xvf ../python-3.11.2-docs-html.tar.bz2
+
+```
+
+root user use pip3 command, to install Python 3 program and modules. conflict with recommendation.
+
+2to3, idle3, pip3, pydoc3, python3, python3-config,
+
+libpython3.11.so, libpython3.so
+
+/usr/include/python3.11, /usr/lib/python3, /usr/share/doc/python-3.11.2,
+
+#### Wheel-0.38.4
+a Python library which is the reference implementation of the Python wheel packaging standard,
+
+```shell
+PYTHONPATH=src pip3 wheel -w dist --no-build-isolation --no-deps $PWD
+pip3 install --no-index --find-links=dist wheel
+
+```
+
+wheel, a utility to unpack, pack, or convert wheel archives,
+
+#### 8.52 Ninja-1.11.1
+a small build system with a focus on speed
+
+```shell
+export NINJAJOBS=4
+sed -i '/int Guess/a \
+int j = 0;\
+char* jobs = getenv( "NINJAJOBS" );\
+if ( jobs != NULL ) j = atoi( jobs );\
+if ( j > 0 ) return j;\
+' src/ninja.cc
+
+python3 configure.py --bootstrap
+
+./ninja ninja_test
+./ninja_test --gtest_filter=-SubprocessTest.SetWithLots
+
+install -vm755 ninja /usr/bin/
+install -vDm644 misc/bash-completion /usr/share/bash-completion/completions/ninja
+install -vDm644 misc/zsh-completion /usr/share/zsh/site-functions/_ninja
+
+```
+
+#### 8.53 Meson-1.0.0
+Open source build system, 
+
+```shell 
+pip3 wheel -w dist --no-build-isolation --no-deps $PWD
+pip3 install --no-index --find-links dist meson
+install -vDm644 data/shell-completions/bash/meson /usr/share/bash-completion/completions/meson
+install -vDm644 data/shell-completions/zsh/_meson /usr/share/zsh/site-functions/_meson
+
+```
+
+#### 8.54 Coreutils-9.1
+包含basic utility programs needed by every operating system,
+
+```shell
+patch -Np1 -i ../coreutils-9.1-i18n-1.patch
+
+autoreconf -fiv
+FORCE_UNSAFE_CONFIGURE=1 ./configure \
+--prefix=/usr \
+--enable-no-install-program=kill,uptime
+
+make
+
+make NON_ROOT_USERNAME=tester check-root
+echo "dummy:x:102:tester" >> /etc/group
+chown -Rv tester .
+su tester -c "PATH=$PATH make RUN_EXPENSIVE_TESTS=yes check"
+
+sed -i '/dummy/d' /etc/group
+make install
+mv -v /usr/bin/chroot /usr/sbin
+mv -v /usr/share/man/man1/chroot.1 /usr/share/man/man8/chroot.8
+sed -i 's/"1"/"8"/' /usr/share/man/man8/chroot.8
+
+```
+
+[, test command,
+base32, base64, 数据的编解码, 
+b2sum,BLAKE2(512-bit) checksums,
+basename,
+basenc, encodecs or decodes data using various algorithms
+cat, 
+chcon, changes security context for files and directories,
+chgrp, changes the group ownership of files and directories,
+chmod, 
+chown,
+chroot, run a comman dwith the specified directory as the / directory,
+cksum, prints the Cyclic Reduncancy Check(CRC) checksum and the byte counts of each specified file, 
+comm, Compares two sorted files, outputting in three columns the lines that are uniuqe and the lines that are common
+cp, Copies files,
+csplit,
+cut,
+date,
+dd,
+df,
+dir,
+dircolors,
+dirname,
+du, report the amount of disk space used by the current directory,
+echo,
+env,
+expand,
+expr,
+factor,
+false,
+fmt,
+fold,
+groups,
+head,
+hostid,
+id,
+install,
+join,
+link,
+ln,
+logname,
+ls,
+md5sum,
+mkdir
+mkfifo,
+mknod,
+mktemp,
+mv,
+nice,
+nl,
+nohup,
+nproc, number of processing units available to a process,
+numfmt,
+od, dump files in octal and other formats,
+paste, merges the given files,
+pathchk,
+pinky,
+pr,
+printenv,
+printf,
+ptx, produces a permuted index 
+pwd,
+readlink,
+realpath,
+rm
+rmdir,
+runcon,
+seq,
+sha1sum,
+sha224sum,
+sha256sum,
+sha384sum,
+sha512sum,
+shred,
+shuf,
+sleep,
+sort,
+split,
+stat,
+stdbuf,
+stty,
+sum,
+sync,
+tac, Concatenates the given files in reverse,
+tail,
+tee,
+test,
+timeout,
+touch,
+tr, translate, squeeze, deletes the given characters from standard input,
+true,
+truncate,
+tsort,
+tty,
+uname,
+unexpand,
+uniq,
+unlink,
+users,
+vdir, ls -l
+wc,
+who.
+whoami,
+yes,
+libstdbuf, used by stdbuf, 
+
+#### 8.55 Check-0.15.2
+a unit testing framework for C,
+
+```shell
+./configure --prefix=/usr --disable-static
+make
+make check
+make docdir=/usr/share/doc/check-0.15.2 install
+
+```
+checkmk, Awk script for generating C unit tests, for Check unit testing framework,
+
+libcheck.so,
+
+#### 8.56 Diffutils-3.9
+show the differences between files or directories,
+
+```shell
+./configure --prefix=/usr
+make
+make check
+make install
+
+```
+cmp,
+diff,
+diff3, compare 3 files line by line,
+sdiff, merges 2 files and interactively outputs the results,
+
+
+#### 8.57 Gawk-5.2.1
+programs for manipulating text files,
+
+```shell
+sed -i 's/extras//' Makefile.in
+./configure --prefix=/usr
+
+make LN='ln -f' install
+mkdir -pv
+ /usr/share/doc/gawk-5.2.1
+cp -v doc/{awkforai.txt,*.{eps,pdf,jpg}} /usr/share/doc/gawk-5.2.1
+
+```
+awk,
+gawk,
+gawk-5.2.1
+
+#### 8.58 Findutils-4.9.0
+programs to find files, 还会提供xargs program, to run a specified command on each file selected by a search,
+
+```shell
+case $(uname -m) in
+i?86)
+ TIME_T_32_BIT_OK=yes ./configure --prefix=/usr --localstatedir=/var/lib/locate ;;
+x86_64) ./configure --prefix=/usr --localstatedir=/var/lib/locate ;;
+esac
+
+make
+
+chown -Rv tester .
+su tester -c "PATH=$PATH make check"
+
+make install
+
+```
+find,
+locate,
+updatedb, 更新这个locate database, scans the entire file system, including other file systems that are currently mounted, unless told not to, puts every file name it finds into the database,
+xargs, used to apply a given command to a list of files,
+
+#### 8.59 Groff-1.22.4
+programs for processing and formatting text and images,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
