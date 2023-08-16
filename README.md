@@ -1760,24 +1760,598 @@ updatedb, 更新这个locate database, scans the entire file system, including o
 xargs, used to apply a given command to a list of files,
 
 #### 8.59 Groff-1.22.4
-programs for processing and formatting text and images,
+programs for processing and formatting text and images, paper size, A4, letter, to the /etc/papersize 文件。
+
+```shell
+PAGE=A4 ./configure --prefix=/usr
+
+make
+make install
+
+```
+
+addftinfo, read a troff font file, add some additional font-metric information, used by the groff system,
+
+afmtodit, create a font file, for use with groff and grops,
+
+chem, Groff preprocessor, producint chemical structure diagrams,
+
+eqn, compiles descriptions of equations embedded within troff input files into commands that are understood by troff,
+
+eqn2graph,
+
+gdiffmk, marks differences between groff/nroff/troff files,
+
+glilypond, transform sheet music written in the lilypond language into groff language
+
+gperl, preprocessor for groff
+
+gpinyin, preprocessor for PinYin 
+
+grap2graph, a grap program file into a cropped bitmap image,
+
+grn, preprocessor for gremlin files,
+
+grodvi, Tex dvi format
+
+groff, front end to groff document formatting system, 
+
+
+#### 8.60 Grub-2.06
+UEFI support, boot lfs with UEFI, GRUB with UEFIsupport， 
+
+```shell
+unset {C,CPP,CXX,LD}FLAGS
+patch -Np1 -i ../grub-2.06-upstream_fixes-1.patch
+./configure --prefix=/usr \
+--sysconfdir=/etc \
+--disable-efiemu \
+--disable-werror
+
+make 
+make install
+mv -v /etc/bash_completion.d/grub /usr/share/bash-completion/completions
+
+
+```
+a lot of programs,
+
+#### 8.61 gzip-1.12
+
+```shell
+./configure --prefix=/usr
+make check
+make install
+
+```
+gunzip, gzexe, gzip, uncompress, zcat, zcmp, zdiff, zegrep, zfgrep, zforce, zgrep, zless, zmore, znew,
+
+#### iproute2-6.1.0
+basic and advanced IPV4-based networking, 
+
+
+```shell
+sed -i /ARPD/d Makefile
+rm -fv man/man8/arpd.8
+make SBINDIR=/usr/sbin install
+mkdir -pv /usr/share/doc/iproute2-6.1.0
+cp -v COPYING README* /usr/share/doc/iproute2-6.1.0
+
+ip link <device>, allows user to look at the state of devices,
+ip addr, 
+ip neighbor, 
+ip rule ,
+ip route,
+ip tunnel,
+ip maddr, multicast addresses,
+ip mroute
+ip monitor,
+
+lnstat,
+nstat,
+routel
+rtacct
+rtmon
+rtpr
+rtstat
+ss
+tc
+
+```
+
+bridge, ctstat, genl, ifstat,  ip, 
+
+#### 8.63 kbd-2.5.1
+key-table files, console fonts, keyboard utilities,
+
+```shell
+patch -Np1 -i ../kbd-2.5.1-backspace-1.patch
+sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
+sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+./configure --prefix=/usr --disable-vlock
+make
+make check
+make install
+mkdir -pv /usr/share/doc/kbd-2.5.1
+cp -R -v docs/doc/* /usr/share/doc/kbd-2.5.1
+```
+
+chvt,  deallocvt, dumpkeys, fgconsole, getkeycodes, kbdinfo, kbd_mode, kbdrate, loadkeys, loadunimap, mapscrn,  openvt, psfaddtable, psfgettable, psfstriptable, psfxtable, setfont, setkeycodes, setleds, setmetamode, setvtrgb, showconsolefont, showkey, unicode_start, unicode_stop
+
+#### 8.64 libpipeline-1.5.7
+for manipulating pipelines of subprocesses in a flexible and convenient way,
+
+```shell
+./configure --prefix=/usr
+make
+make check
+make install
+
+```
+
+#### 8.65 make-4.4
+```shell
+sed -e '/ifdef SIGPIPE/,+2 d' \
+-e '/undef FATAL_SIG/i FATAL_SIG (SIGPIPE);' \
+-i src/main.c
+
+./configure --prefix=/usr
+```
+
+#### 8.66 patch-2.7.6
+applying a "patch" file created by the diff program,
+
+```shell
+./configure --prefix=/usr
+```
+
+#### 8.67 Tar-1.34
+archive manipulation, tarballs, 
+
+```shell
+FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr
+make
+make check
+make install
+make -C doc install-html docdir=/usr/share/doc/tar-1.34
+
+```
+
+#### texinfo-7.0.2
+for reading, writing, converting info pages,
+
+```shell
+./configure --prefix=/usr
+
+
+make install , 
+make TEXMF=/usr/share/texmf install-tex
+
+pushd /usr/share/info
+    rm -v dir
+    for f in *
+        do install-info $f dir 2>/dev/null
+    done
+popd
+
+```
+
+info,  read info pages similar to man pages, go much deeper than just explaining all the available command line options, man bison, info bison,
+
+install-info,
+
+makeinfo,
+
+pdftexi2dvi,
+
+pod2texi,
+
+texi2any,
+
+texi2dvi,
+
+texi2dvi,
+
+texi2pdf,
+
+texindex,
+
+#### 8.69 vim-9.0.1273
+text editor, similar to Emacs, Joe, Nano, 
+
+```shell
+echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
+./configure --prefix=/usr
+chown -Rv tester .
+su tester -c "LANG=en_US.UTF-8 make -j1 test" &> vim-test.log
+make install
+
+ln -sv vim /usr/bin/vi
+for L in /usr/share/man/{,*/}man1/vim.1; do
+    ln -sv vim.1 $(dirname $L)/vi.1
+done
+
+ln -sv ../vim/vim90/doc /usr/share/doc/vim-9.0.1273
+
+# default configuration
+cat > /etc/vimrc << "EOF"
+" Begin /etc/vimrc
+" Ensure defaults are set before customizing settings, not after
+source $VIMRUNTIME/defaults.vim
+let skip_defaults_vim=1
+set nocompatible
+set backspace=2
+set mouse=
+syntax on
+if (&term == "xterm") || (&term == "putty")
+set background=dark
+endif
+" End /etc/vimrc
+EOF
+
+vim -c ':options'
+
+# spell-checking files, only for English language,
+.spl, .sug files for your language,
+/etc/vimrc,
+set spelllang=en,ru
+set spell
 
 
 
+```
+
+ex, start vim in ex mode,
+
+rview, 
+
+rvim, 
+
+vi,
+
+view,
+
+vim,
+
+vimdiff,
+
+vimtutor,
+
+xxd, creates a hex dump of the given file, 
+
+#### 8.70 eudev-3.2.11
+programs for dynamic creation of device nodes,
+
+```shell
+sed -i '/udevdir/a udev_dir=${udevdir}' src/udev/udev.pc.in
+./configure --prefix=/usr \
+--bindir=/usr/sbin \
+--sysconfdir=/etc \
+--enable-manpages \
+--disable-static
+
+make
+mkdir -pv /usr/lib/udev/rules.d
+mkdir -pv /etc/udev/rules.d
+tar -xvf ../udev-lfs-20171102.tar.xz
+make -f udev-lfs-20171102/Makefile.lfs install
+
+# configuring eudev,
+/etc/udev/hwdb.d
+/usr/lib/udev/hwdb.d,
+# compiled into a binary database /etc/udev/hwdb.bin,
+udevadm hwdb --update
+
+```
+
+udevadm, udev administration tool, controls the udevd daemon, provide info from the Udev database, monitors uevents, waits for uevents to finish, tests Udev configuration, triggers uevents for a given device,
+
+udevd, a daemon listens for uevents on the netlink socket, creates devices and runs the configured external programs in response to the uevents,
+
+libudev,
+
+/etc/udev,
+
+#### man-db-2.11.2
+Man-DB package contains programs for finding and viewing man pages,
+
+```shell
+./configure --prefix=/usr \
+--docdir=/usr/share/doc/man-db-2.11.2 \
+--sysconfdir=/etc \
+--disable-setuid \
+--enable-cache-owner=bin \
+--with-browser=/usr/bin/lynx \
+--with-vgrind=/usr/bin/vgrind \
+--with-grap=/usr/bin/grap \
+--with-systemdtmpfilesdir= \
+--with-systemdsystemunitdir=
 
 
+```
+
+lynx, text-based web browser, 
+
+vgrind, convert program sources to Groff input,
+
+grap, for typesetting graphs in Groff documents,
+
+/usr/share/man/<11>, 
+
+accessdb, dumps the whatis database contents in human-readable form
+
+apropos, 搜寻whatis database, display the short descriptions of system commands that contain a given string
+
+catman, creates or updates the pre-formatted manual pages,
+
+lexgrog, one-line summay information about a given manual page,
+
+man,
+
+man-recode, converts manual pages to another encoding,
+
+mandb, creates or updates the whatis database
+
+manpath, 
+
+whatis
+
+libman, libmandb, 
 
 
+#### 8.72 procps-ng-4.0.2
+procps-ng packages, for monitoring processes,
+
+```shell
+./configure --prefix=/usr \
+--docdir=/usr/share/doc/procps-ng-4.0.2 \
+--disable-static \
+--disable-kill
+
+```
+kill will be installed from the Util-linux package??
+
+free
+
+pgrep, pidof, pkill,
+
+pmap, report the memory map of the given process,
+
+ps,
+
+pwdx, current working directory of a process,
+
+slabtop, detailed kernel slab cache info in real time,
+
+sysctl, modifies kernel parameters at run time,
+
+tload, print a graph of the current system load average,
+
+uptime, 
+
+vmstat, virtual memory statistics, info about processes, memory , paging, block I/O, traps, CPU activity,
+
+w,
+
+watch,
+
+libproc-2,
+
+#### 8.74 util-linux-2.38.1
+utilities for handling file systems, consoles, partitions, messages,
+
+```shell
+./configure ADJTIME_PATH=/var/lib/hwclock/adjtime \
+--bindir=/usr/bin \
+--libdir=/usr/lib \
+--sbindir=/usr/sbin \
+--disable-chfn-chsh \
+--disable-login \
+--disable-nologin \
+--disable-su \
+--disable-setpriv \
+--disable-runuser \
+--disable-pylibmount \
+--disable-static \
+--without-python \
+--without-systemd \
+--without-systemdsystemunitdir \
+--docdir=/usr/share/doc/util-linux-2.38.1
+
+make
+
+chown -Rv tester .
+su tester -c "make -k check"
+make install
 
 
+```
 
+addpart, 
 
+agetty, open a tty port, prompts for a login name, invoke the login program,
 
+blkdiscard, blkid, blkzone, 
 
+blockdev, to call block device ioctls from the command line,
 
+cal, 
 
+cfdisk, manipulate the partition table of the given device,
 
+chcpu, modifies the state of CPUs,
 
+chmem, configure memory,
+
+choom, display and adjust OOM-killer scores, determine which process to kill first when Linux is Out Of Memory,
+
+chrt, manipulates real-time attributes of a process,
+
+col, filter out reverse line feeds,
+
+colcrt, filters nroff output for terminals lack some capabilities 
+
+colrm, 
+
+column, formats a given file into multi columns,
+
+ctrlaltdel,  set the function of key combination,
+
+delpart,
+
+dmesg, dump the kernel boot messages,
+
+eject, ejects removable media,
+
+fallocate, preallocates space to a file,
+
+fdisk, manipulates the partition table of the given device
+
+fincore, counts pages of file contents in core,
+
+findfs,
+
+findmnt,
+
+flock,
+
+fsck,
+
+fsck.cramfs,
+
+fsck.minix
+
+fsfreeze,  fstrim, 
+
+getopt, 
+
+hardlink, 
+
+hexdump, 
+
+hwclock,
+
+i386, symbolic link to setarch, linux32, linux64, 
+
+ionice, set the io scheduling class and priority for a program,
+
+ipcmk, create various IPC resources,
+
+ipcrm, removes the given Inter-Process Communication (IPC) resource
+
+ipcs
+
+irqtop, 
+
+isosize, 
+
+kill, 
+
+last, users last logged in and out, searching through /var/log/wtmp file,
+
+lastb, failed login attempts, /var/log/btmp,
+
+ldattach, attach a line dscipline to a serial line,
+
+logger, enters the given message into the system log,
+
+look, 
+
+losetup,, 
+
+lsblk, lscpu, lsfd, lsof, opened files,
+
+lsipc, 
+lsirq,
+lslocks,
+
+lslogins, info about users, groups, system accounts,
+
+lsmem, 
+
+lsns, 
+
+mcookie, generate magic cookies, 128 bit random hexadecimal numbers,
+
+mesg,
+
+mkfs, mkfs.bfs, mkfs.cramfs, mkfs.minix, mkswap, 
+
+more
+
+mount, mountpoint,
+
+namei,  nsenter,
+
+partx,
+
+pivot_root, make the given file system the new root file system of the current process,
+
+prlimit, print a process's resource limits,
+
+readprofile, 
+
+rename, renice
+
+resizepart,
+
+rev
+
+rkfill, enabling and disabling wireless devices,
+
+rtcwake, enter a system sleep state until the specified wakeup time,
+
+script, 
+
+scriptlive, re-runs session typescripts using timing information,
+
+scriptreplay,
+
+setarch
+
+setsid, run the given program in a new session,
+
+setterm,
+
+sfdisk, disk partition table manipulator,
+
+sulogin,
+
+swaplabel,
+
+swapoff, swapon, 
+
+switch_root, 
+
+taskset, set a process's CPU affinity,
+
+uclampset, 
+
+ul, 
+
+umount,
+
+uname26,
+
+unshare,
+
+utmpdump, 
+
+uuidd, a daemon used by UUID library to generate time-based UUIDs,
+
+uuidgen, uuidparse
+
+wall,
+
+wdctl, 
+
+whereis,
+
+wipefs, wipe a filesystem signature from a device
+
+zramctl, setup and control zram, compressed ram disk devices,
+
+libblkid, libfdisk, libmount, libsmartcols, libuuid,
 
 
 
