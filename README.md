@@ -2137,7 +2137,7 @@ watch,
 
 libproc-2,
 
-#### 8.74 util-linux-2.38.1
+#### 8.73 util-linux-2.38.1
 utilities for handling file systems, consoles, partitions, messages,
 
 ```shell
@@ -2352,6 +2352,734 @@ wipefs, wipe a filesystem signature from a device
 zramctl, setup and control zram, compressed ram disk devices,
 
 libblkid, libfdisk, libmount, libsmartcols, libuuid,
+
+#### 8.74 e2fsprogs1.47.0
+handling ext2 file system, 也支持ext3, ext4 journaling file systems, 似乎还包含了debugfs的一些接口。
+
+```shell
+mkdir -v build
+cd build
+
+../configure --prefix=/usr \
+--sysconfdir=/etc \
+--enable-elf-shlibs \
+--disable-libblkid \
+--disable-libuuid \
+--disable-uuidd \
+--disable-fsck
+
+make
+make check
+make install
+rm -fv /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
+
+gunzip -v /usr/share/info/libext2fs.info.gz
+install-info --dir-file=/usr/share/info/dir /usr/share/info/libext2fs.info
+
+makeinfo -o doc/com_err.info ../lib/et/com_err.texinfo
+install -v -m644 doc/com_err.info /usr/share/info
+install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
+
+sed 's/metadata_csum_seed,//' -i /etc/mke2fs.conf
+
+
+```
+
+badblocks, 
+
+chattr, 修改文件属性,
+
+compile_et, with the com_err library,
+
+debugfs, dumpe2fs, 
+
+e2freefrag, e2fsck, e2image, e2label, e2mmpstatus, e2scrub, e2scrub_all, e2undo, e4crypt, e4defrag, filefrag, fsck.ext2, fsck.ext3, fsck.ext4, logsave, lsattr, mk_cmds, mke2fs, mkfs.ext2, mkfs.ext3, mkfs.ext4, mklost+found, 
+
+resize2fs, to enlarge or shrink ext{2 3 4} file system,
+
+tune2fs, adjust tunable file system parameters 
+
+libcom_err, common error display routine
+
+libe2p, by dumpe2fs, chattr, lsattr,
+
+libext2fs, enable user-level programs to manipulate ext{234} file systems
+
+libss, used by debugfs,
+
+#### sysklogd-1.5.1
+logging system messages, as those emitted by the kernel when unusual things happen,
+
+```shell
+sed -i '/Error loading kernel symbols/{n;n;d}' ksym_mod.c
+sed -i 's/union wait/int/' syslogd.c
+make
+make BINDIR=/sbin install
+
+cat > /etc/syslog.conf << "EOF"
+# Begin /etc/syslog.conf
+auth,authpriv.* -/var/log/auth.log
+*.*;auth,authpriv.none -/var/log/sys.log
+daemon.* -/var/log/daemon.log
+kern.* -/var/log/kern.log
+mail.* -/var/log/mail.log
+user.* -/var/log/user.log
+*.emerg *
+# End /etc/syslog.conf
+EOF
+
+```
+
+syslogd, system programs offer for logging, 
+
+klogd, kernel messages, 
+
+#### 8.76 sysvinit-3.06
+Sysvinit package, for controlling the startup, running , shutdown of the system,
+
+```shell
+patch -Np1 -i ../sysvinit-3.06-consolidated-1.patch
+make
+make install
+```
+
+bootlogd, logs boot messages to a log file
+
+fstab-decode, 
+
+halt, 
+
+init, 1st process to be started, when the kernel has initialized the hardware,
+
+killall5, send a signal to all processes, 
+
+poweroff, kernel to halt the system and switch off the computer
+
+reboot
+
+runlevel, report the previous and current run-level, /run/utmp,
+
+shutdown, bring down the system in a secure way, signaling all processes and notifying all logged-in users
+
+telint, tells init which run-level to change to
+
+#### 8.77 About Debugging symbols,
+most compiled with -g, 
+
+```shell
+strip --strip-unneeded 
+
+
+```
+
+valgrind,
+
+gdb,
+
+ELF loader, ld-linux-x86-64.so.2, ld-linux.so.2, 
+
+### chap 9 System Configuration,
+系统配置, process必须加载virtual, real file system, 初始化设备，检查文件系统的完整性，安装启动swap partitions or files, 设置系统时钟，bring up networking, start daemons, accomplish any custom tasks specified by the user. 保证tasks performed in the correct order, executed as quickly as possible.
+
+#### System V
+boot process, init, login, rc, 控制一系列的脚本,
+
+```shell
+/etc/inittab
+
+# run levels
+0, halt
+1, Single user mode
+2, User definable
+3, Full multiuser mode
+4, User definable
+5, Full multiuser mode with display manager
+6, reboot
+```
+
+缓慢, 不支持control groups, per-user fair share scheduling,
+
+manual , static sequencing decisions,
+
+#### LFS-Bootscripts-20230101
+a set of scripts to start/stop the LFS system at bootup/shutdown,
+
+```shell
+make install,
+
+/etc/rc.d
+/etc/init.d # symbolic link
+/etc/sysconfig
+/lib/services,
+/lib/lsb  # symbolic links
+
+```
+checkfs, cleanfs
+
+console, functions, halt,
+
+ifdown, ifup, 
+
+localnet
+
+modules, load kernel modules listed in /etc/sysconfig/modules, 
+
+mountfs, mountvirtfs, such as: /proc, 
+
+network, 
+
+rc, master run-level script, 
+
+reboot, 
+
+sendsignals, make sure every process terminated before system reboots or halts,
+
+setclock, 
+
+ipv4-static, 
+
+swap, enable, disable swap files and partitions,
+
+sysclt,
+sysklogd,
+
+template, to create custom bootscripts for other daemons,
+
+udev, prepare the /dev directory, starts the udev daemon
+
+udev_retry, retries failed udev uevents, copies generated rule files form /run/udev to /etc/udev/rules.d
+
+#### 9.3 Device and Module handling
+device nodes, created under /dev, 不管真实的硬件设备是否存在, 
+
+MAKEDEV script, 包含了一系列call to mknod, with relevant major, minor device numbers for every possible device that might exist, 
+
+使用udev,只会生成被kernel检测到的设备, devtmpfs文件系统里, 
+
+devfs, handles device detection, creation, naming, removed from the kernel in June 2006,
+
+sysfs, provide info about system's hardware configuration to userspace processes,user space replacement
+
+#### udev方案,
+drivers, 编译进了内核，注册了它们的objects in sysfs, devtmpfs internally, detected by the kernel, 对于作为模块的驱动，注册发生在module load加载的时刻。/sys, file system 文件系统加载后, 驱动注册的数据可以被userspace process, udevd访问、处理, 
+
+设备节点生成，设备文件，devtmpfs, mounted on /dev, 暴露给用户空间，with fixed name, permissions, and owner,
+
+kernel发送uevent给udevd, /etc/udev/rules.d, /usr/lib/udev/rules.d, /run/udev/rules.d目录, udevd还会生成一些device node的链接文件, change its permissions, owner, group, 更改internal udevd database entry, 3个目录里的规则会一起合并，如果udevd没有找到设备的任何一条规则，则leave the permissions and ownership at whatever devtmpfs used initially,
+
+模块加载, 设备驱动, 会有aliases, 通过modinfo查看, bus-specific identifiers of devices, /sbin/modprobe, modalias file in sysfs, loading all modules whose aliases match the string after wildcard expansion.
+
+kernel自动加载network protocols module, filesystem NLS support on demand
+
+处理热插拔设备, Hotpluggable/Dynamic Devices, USB, handled by udevd,
+
+加载驱动module, 生成device的问题:
+
+udev只会加载module, 拥有bus-specific alias, bus driver properly exports necessary aliases to sysfs, Linux-6.1.11, udev可以加载INPUT, IDE, PCI, USB, SCSI, SERIO, FIREWIRE devices,
+
+/sys/bus, modalias file, 
+
+```shell
+/etc/modprobe.d/<**>.conf,
+softdep snd-pcm post: snd-pcm-oss
+
+/etc/modprobe.d/blacklist.conf file, 
+
+/usr/lib/udev/devices, with appropirate major minor numbers, the static device node will be copied to /dev by udev,
+```
+
+udev handles uevents and loads modules in parallel, in an unpredictable order. Create your own rules that make symlinks with stable names based on some stable attributes of the device, 
+
+Userspace implementation of devfs, 用户空间的设备文件系统,
+
+sysfs 文件系统,
+
+#### 管理设备
+##### 网络设备, 
+Udev, 根据Firmware/BIOS data or physical characteristics like bus, slot, MAC address. Intel network card will become eth0, while Realtek card become eth1. 
+
+在新的命名方案里面, typical network device name , enp5s0, wlp3s0, 也可以使用传统的命名方案，或者定制的方案,
+
+##### 命名方法,
+disabling persistent naming on the kernel command line, restored by pass net.ifnames=0 on kernel command line. 对只使用一个ethernet device的设备比较合适。The command line is in the GRUB configuration file.
+
+也可以通过udev rules来改变, 
+```shell
+bash /usr/lib/udev/init-net-rules.sh
+/etc/udev/rules.d/
+/usr/lib/udev/rules.d/
+
+eno1,
+
+wlp5s0,
+
+# 查看
+ip link 
+
+```
+
+by-path mode,  default for USB, FireWire devices, path_id,  /sys/block/hdd, 
+
+by-id mode, default for IDE, SCSI devices, ata_id, scsi_id,  ID_SERIAL, ID_MODEL, ID_REVISION, ID_PATH,
+
+Write rules to create symlinks to different usb devices. 
+
+
+##### Network Interface Configuration 文件,
+
+```shell
+cd /etc/sysconfig/
+cat > ifconfig.eth0 << "EOF"
+ONBOOT=yes   # bring up the netwok interface card during system boot process
+IFACE=eth0   # the interface name, 
+SERVICE=ipv4-static  # method used for obtaining the IP address,
+IP=192.168.0.97
+GATEWAY=192.168.0.1
+PREFIX=24
+BROADCAST=192.168.0.255
+EOF
+
+```
+
+##### /etc/resolv.conf File
+获取DNS name resolution to resolve Internet Domain Names to IP address, 
+
+```shell
+/etc/resolv.conf 
+cat > /etc/resolv.conf << "EOF"
+# Begin /etc/resolv.conf
+domain <Your Domain Name>
+nameserver <IP address of your primary nameserver>
+nameserver <IP address of your secondary nameserver>
+# End /etc/resolv.conf
+EOF
+
+```
+
+hostname, /etc/hostname
+
+/etc/hosts文件, 
+
+```shell
+IP_address myhost.example.org aliases
+Private Network Address Range Normal Prefix
+10.0.0.1 - 10.255.255.254 8
+172.x.0.1 - 172.x.255.254 16
+192.168.y.1 - 192.168.y.254 24
+
+cat > /etc/hosts << "EOF"
+# Begin /etc/hosts
+127.0.0.1 localhost.localdomain localhost
+127.0.1.1 <FQDN> <HOSTNAME>
+<192.168.1.1> <FQDN> <HOSTNAME> [alias1] [alias2 ...]
+::1
+ localhost ip6-localhost ip6-loopback
+ff02::1
+ ip6-allnodes
+ff02::2
+ ip6-allrouters
+# End /etc/hosts
+EOF
+```
+For certain programs to operate correctly.
+
+
+### System V Bootscript Usage and Configuration
+SysVinit, based on a series of run levels,这里没有使用systemd,
+
+```shell
+0: halt
+1: single user mode
+2: same as 3, reserved for customization
+3: multi user mode with networking
+4: otherwise same as 3
+5: same as 4, with GUI login, like GNOME's gdm, LXDE's lxdm, 
+6: reboot
+
+# init program will read the initialization file /etc/inittab,
+cat > /etc/inittab << "EOF"
+# Begin /etc/inittab
+id:3:initdefault:
+si::sysinit:/etc/rc.d/init.d/rc S
+l0:0:wait:/etc/rc.d/init.d/rc 0
+l1:S1:wait:/etc/rc.d/init.d/rc 1
+l2:2:wait:/etc/rc.d/init.d/rc 2
+l3:3:wait:/etc/rc.d/init.d/rc 3
+l4:4:wait:/etc/rc.d/init.d/rc 4
+l5:5:wait:/etc/rc.d/init.d/rc 5
+l6:6:wait:/etc/rc.d/init.d/rc 6
+ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
+su:S06:once:/sbin/sulogin
+s1:1:respawn:/sbin/sulogin
+1:2345:respawn:/sbin/agetty --noclear tty1 9600
+2:2345:respawn:/sbin/agetty tty2 9600
+3:2345:respawn:/sbin/agetty tty3 9600
+4:2345:respawn:/sbin/agetty tty4 9600
+5:2345:respawn:/sbin/agetty tty5 9600
+6:2345:respawn:/sbin/agetty tty6 9600
+# End /etc/inittab
+EOF
+
+
+/lib/lsb/init-functions,
+/etc/sysconfig/rc.site
+
+/run/var/bootlog ,
+/var/log/boot.log
+
+所有的脚本在 /etc/rc.d/init.d/目录下面,
+
+/etc/rc.d/init.d/udev initscript 启动udevd, triggers coldplug devices, wait for the rules to complete,
+/sbin/hotplug, unsets the uevent handler from the default hotplug,
+# udevd will listen on a netlink socket for uevents that kernel raises,
+
+```
+
+S, start a service, 
+
+K, stop a service, 
+
+
+#### System Clock,
+setclock script, 从硬件时钟读取time, BIOS or CMOS clock, UTC, /etc/localtime file, hwclock, 
+
+```shell
+$ sudo hwclock --localtime --show
+2023-08-17 07:14:35.312799+08:00
+
+cat > /etc/sysconfig/clock << "EOF"
+# Begin /etc/sysconfig/clock
+UTC=1
+# Set this to any options you might need to give to hwclock,
+# such as machine hardware clock type for Alphas.
+CLOCKPARAMS=
+# End /etc/sysconfig/clock
+EOF
+
+
+```
+
+
+#### Linux Console配置
+console bootscript, setup the keyboard map, console font, console kernel log level,
+
+```shell
+/etc/sysconfig/rc.site, 
+
+# 读取
+/etc/sysconfig/console 
+
+/usr/share/keymaps/,
+/usr/share/consolefonts/
+
+
+cat > /etc/sysconfig/console << "EOF"
+# Begin /etc/sysconfig/console
+KEYMAP="pl2"
+FONT="lat2a-16 -m 8859-2"
+# End /etc/sysconfig/console
+EOF
+
+cat > /etc/sysconfig/console << "EOF"
+# Begin /etc/sysconfig/console
+UNICODE="1"
+KEYMAP="us"
+FONT="lat1-16 -m 8859-1"
+# End /etc/sysconfig/console
+EOF
+
+```
+
+#### Creating Files at Boot,
+放在 /etc/sysconfig/createfiles脚本里面,
+
+/etc/sysconfig/rc.site文件,
+
+```shell
+# rc.site
+# Optional parameters for boot scripts.
+# Distro Information
+# These values, if specified here, override the defaults
+#DISTRO="Linux From Scratch" # The distro name
+#DISTRO_CONTACT="lfs-dev@lists.linuxfromscratch.org" # Bug report address
+#DISTRO_MINI="LFS" # Short name used in filenames for distro config
+# Define custom colors used in messages printed to the screen
+# Please consult `man console_codes` for more information
+# under the "ECMA-48 Set Graphics Rendition" section
+#
+# Warning: when switching from a 8bit to a 9bit font,
+# the linux console will reinterpret the bold (1;) to
+# the top 256 glyphs of the 9bit font. This does
+# not affect framebuffer consoles
+# These values, if specified here, override the defaults
+#BRACKET="\\033[1;34m" # Blue
+#FAILURE="\\033[1;31m" # Red
+#INFO="\\033[1;36m"
+ # Cyan
+#NORMAL="\\033[0;39m" # Grey
+#SUCCESS="\\033[1;32m" # Green
+#WARNING="\\033[1;33m" # Yellow
+# Use a colored prefix
+# These values, if specified here, override the defaults
+#BMPREFIX="      "
+#SUCCESS_PREFIX="${SUCCESS} * ${NORMAL} "
+#FAILURE_PREFIX="${FAILURE}*****${NORMAL} "
+#WARNING_PREFIX="${WARNING} *** ${NORMAL} "
+# Manually set the right edge of message output (characters)
+# Useful when resetting console font during boot to override
+
+# automatic screen width detection
+#COLUMNS=120
+# Interactive startup
+#IPROMPT="yes" # Whether to display the interactive boot prompt
+#itime="3"
+ # The amount of time (in seconds) to display the prompt
+# The total length of the distro welcome string, without escape codes
+#wlen=$(echo "Welcome to ${DISTRO}" | wc -c )
+#welcome_message="Welcome to ${INFO}${DISTRO}${NORMAL}"
+# The total length of the interactive string, without escape codes
+#ilen=$(echo "Press 'I' to enter interactive startup" | wc -c )
+#i_message="Press '${FAILURE}I${NORMAL}' to enter interactive startup"
+# Set scripts to skip the file system check on reboot
+#FASTBOOT=yes
+# Skip reading from the console
+#HEADLESS=yes
+# Write out fsck progress if yes
+#VERBOSE_FSCK=no
+# Speed up boot without waiting for settle in udev
+#OMIT_UDEV_SETTLE=y
+# Speed up boot without waiting for settle in udev_retry
+#OMIT_UDEV_RETRY_SETTLE=yes
+# Skip cleaning /tmp if yes
+#SKIPTMPCLEAN=no
+# For setclock
+#UTC=1
+#CLOCKPARAMS=
+# For consolelog (Note that the default, 7=debug, is noisy)
+#LOGLEVEL=7
+# For network
+#HOSTNAME=mylfs
+# Delay between TERM and KILL signals at shutdown
+#KILLDELAY=3
+# Optional sysklogd parameters
+#SYSKLOGD_PARMS="-m 0"
+# Console parameters
+#UNICODE=1
+#KEYMAP="de-latin1"
+#KEYMAP_CORRECTIONS="euro2"
+#FONT="lat0-16 -m 8859-15"
+#LEGACY_CHARSET=
+```
+
+Boot and shutdown scripts,
+
+#### Bash Shell Startup Files
+/bin/login, reading /etc/passwd file, 
+
+non-login shell, non-interactive shell usually present when a shell script is running, 
+
+```shell
+/etc/profile
+~/.bash_profile,
+
+locale,
+locale -a # 显示Glibc支持的所有的locale, 
+
+cat > /etc/profile << "EOF"
+# Begin /etc/profile
+export LANG=en_US.iso88591
+# End /etc/profile
+EOF
+
+
+```
+
+"C" (default), "en_US.utf8", 
+
+
+/etc/inputrc 文件, # readline library的配置文件, translating keyboard inputs into specific actions, Readline is used by bash and most other shells as well as many other applications,
+
+~/.inputrc文件, 
+
+```shell
+cat > /etc/inputrc << "EOF"
+# Begin /etc/inputrc
+# Modified by Chris Lynn <roryo@roryo.dynup.net>
+# Allow the command prompt to wrap to the next line
+set horizontal-scroll-mode Off
+# Enable 8-bit input
+set meta-flag On
+set input-meta On
+# Turns off 8th bit stripping
+set convert-meta Off
+# Keep the 8th bit for display
+set output-meta On
+# none, visible or audible
+set bell-style none
+# All of the following map the escape sequence of the value
+# contained in the 1st argument to the readline specific functions
+"\eOd": backward-word
+"\eOc": forward-word
+# for linux console
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+"\e[5~": beginning-of-history
+"\e[6~": end-of-history
+"\e[3~": delete-char
+"\e[2~": quoted-insert
+# for xterm
+"\eOH": beginning-of-line
+"\eOF": end-of-line
+# for Konsole
+"\e[H": beginning-of-line
+"\e[F": end-of-line
+# End /etc/inputrc
+EOF
+
+```
+
+/etc/shells文件,
+包含了一系列的login shells on the system, 
+
+```shell
+cat > /etc/shells << "EOF"
+# Begin /etc/shells
+/bin/sh
+/bin/bash
+# End /etc/shells
+EOF
+```
+
+
+### chap 10, Making the LFS system bootable,
+#### /etc/fstab文件,
+加载的文件, kernel, GRUBbootloader, 可以选择用来启动, startup,
+
+```shell
+/dev/xxx /
+/dev/yy  swap
+proc   /proc
+sysfs  /sys
+devpts /dev/pts
+tmpfs  /run
+devtmpfs  /dev
+tmpfs     /dev/shm
+
+
+```
+
+#### Linux-6.1.11
+Building the kernel
+
+```shell
+make mrproper
+make menuconfig,
+
+# contents of Linux
+config-6.1.11, # all the configuration selections for the kernel
+vmlinuz-6.1.11-lfs-11.3, # kernel, detects and initializes all components of the computer's hardware, makes these components avaialble as a tree of files to the software, turns a single CPU into a multitasking machine capbale of urnning scores of programs seemingly at the same time
+
+System.map-6.1.11,  # a list of addresses and symbols, map the entry points and addresses of all the functions and data structures in the kernel.
+
+
+```
+
+BLFS?  Beyond Linux From Scratch,
+
+
+#### GRUB to setup the Boot Process
+UEFI or GRUB, 
+
+```shell
+cd /tmp
+grub-mkrescue --output=grub-img.iso
+xorriso -as cdrecord -v dev=/dev/cdrw blank=as_needed grub-img.iso
+
+# GRUB naming,
+sda1, (hd0,1)
+sdb3 (hd1,3)
+
+
+# GRUB Configuration File
+/boot/grub/grub.cfg,
+cat > /boot/grub/grub.cfg << "EOF"
+# Begin /boot/grub/grub.cfg
+set default=0
+set timeout=5
+insmod ext2
+set root=(hd0,2)
+menuentry "GNU/Linux, Linux 6.1.11-lfs-11.3" {
+linux
+ /boot/vmlinuz-6.1.11-lfs-11.3 root=/dev/sda2 ro
+}
+EOF
+
+
+```
+Grub将数据卸载hard disk的第一个物理磁道, physical track, not part of any file system. 程序接下来会访问boot partition里的Grub modules, 模块, /boot/grub, 一个200MB的boot分区, just for boot information,
+
+使用disk 的UUID, 
+
+grub-mkconfig, 自动写一个configuration file,
+
+/etc/grub.d/
+
+### Chap 11 The End, 最终章,
+```shell
+/etc/lfs-release, file, 
+cat > /etc/lsb-release << "EOF"
+DISTRIB_ID="Linux From Scratch"
+DISTRIB_RELEASE="11.3"
+DISTRIB_CODENAME="<your name here>"
+DISTRIB_DESCRIPTION="Linux From Scratch"
+EOF
+
+# Rebooting the System,
+Install firmware needed if the kernel driver requires
+# other configuration files
+/etc/bashrc
+/etc/dircolors
+/etc/fstab
+/etc/hosts
+/etc/inputrc
+/etc/profile
+/etc/resolv.conf
+/etc/vimrc
+/root/.bash_profile
+/root/.bashrc
+/etc/sysconfig/ifconfig.eth0
+
+
+logout
+sudo umount -v $LFS/dev/pts
+sudo mountpoint -q $LFS/dev/shm && umount $LFS/dev/shm
+sudo umount -v $LFS/dev
+sudo umount -v $LFS/run
+sudo umount -v $LFS/proc
+sudo umount -v $LFS/sys
+
+
+
+```
+
+system creation process,
+
+#### What next?
+Maintenance, 
+
+LFSHints，
+
+Mailing lists,
+
+Linux Document Project, TLDP, 
+
+Workstation graphical user environment, LXDE, XFCE, KDE, Gnome,  needs, Firefox browser, Thunderbird email client, libreOffice Office suite,
+
+
+Server,
+
+
+
 
 
 
